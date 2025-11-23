@@ -5,16 +5,22 @@ import { LOCATIONS } from './constants';
 const App: React.FC = () => {
   // Now tracking ID instead of just country name to distinguish multiple races in one country
   const [activeLocationId, setActiveLocationId] = useState<number | null>(null);
+
+  // Track if user is interacting with the list directly to prevent fighting over scroll control
+  const [isHoveringList, setIsHoveringList] = useState(false);
+
   const [audioTipVisible, setAudioTipVisible] = useState(true);
 
   // Background Music Logic
   useEffect(() => {
-    const audio = new Audio('alive.mp3'); // Adjust the path to the root directory of dist
+    const audio = new Audio('alive.mp3');
     audio.loop = true;
     audio.volume = 0.6; // Set a reasonable volume
 
-    // Attempt to play immediately
+    // Set start time to 5 seconds
     audio.currentTime = 5;
+
+    // Attempt to play immediately
     const playPromise = audio.play();
 
     if (playPromise !== undefined) {
@@ -49,6 +55,22 @@ const App: React.FC = () => {
     };
   }, []);
   
+  // Auto-scroll functionality
+  useEffect(() => {
+    // Only auto-scroll if we have an active location AND the user is NOT hovering the list.
+    // If they are hovering the list, they are manually exploring, so we shouldn't hijack the scroll.
+    if (activeLocationId && !isHoveringList) {
+      const element = document.getElementById(`loc-item-${activeLocationId}`);
+      if (element) {
+        element.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+          inline: 'nearest'
+        });
+      }
+    }
+  }, [activeLocationId, isHoveringList]);
+  
   return (
     <div className="w-screen h-screen relative bg-[#061D42] overflow-hidden text-white font-sans">
       
@@ -74,39 +96,50 @@ const App: React.FC = () => {
 
       {/* Right Sidebar List (F1 World Tour) - Overlay on Desktop */}
       <aside className="absolute bottom-0 md:top-0 md:right-0 w-full h-1/3 md:h-full md:w-80 bg-slate-900/80 border-t md:border-t-0 md:border-l border-red-900/50 flex flex-col z-30 shadow-2xl backdrop-blur-sm">
-        <div className="hidden md:block p-6 border-b border-red-900/20 bg-gradient-to-b from-slate-900/90 to-slate-900/80">
+        <div className="hidden md:block p-6 border-b border-red-900/20 bg-gradient-to-b from-slate-900/90 to-slate-900/80 relative z-20">
           <h1 className="text-3xl font-black tracking-tighter italic text-white uppercase font-['Rajdhani']">
-            F1<span style={{ display: 'inline-block', width: '1ch' }}></span><span className="text-[#d11100]">RACE CALENDAR</span>
+            F1 <span className="text-[#d11100]">World Tour</span>
           </h1>
           <div className="h-1 w-20 bg-[#d11100] mt-2 rounded-full"></div>
         </div>
         
-        <div className="flex-1 overflow-y-auto custom-scrollbar bg-transparent">
-          <ul className="p-0" onMouseLeave={() => setActiveLocationId(null)}>
+        <div className="flex-1 overflow-y-auto custom-scrollbar bg-transparent px-2 md:px-0 pb-10">
+          <ul 
+            className="p-0" 
+            onMouseEnter={() => setIsHoveringList(true)}
+            onMouseLeave={() => {
+              setIsHoveringList(false);
+              setActiveLocationId(null);
+            }}
+          >
             {LOCATIONS.map((loc, index) => {
               const isActive = loc.id === activeLocationId;
               return (
                 <li 
                   key={loc.id}
+                  id={`loc-item-${loc.id}`}
                   onMouseEnter={() => setActiveLocationId(loc.id)}
                   className={`
-                    group relative cursor-pointer border-b border-slate-800/50 transition-all duration-300 font-['Space_Grotesk']
-                    ${isActive ? 'bg-slate-800/80 border-l-4 border-l-[#d11100]' : 'hover:bg-slate-800/40 border-l-4 border-l-transparent'}
+                    group relative cursor-pointer transition-all duration-300 ease-out font-['Space_Grotesk']
+                    ${isActive 
+                        ? 'bg-[#0a1624] border-l-4 border-l-[#d11100] scale-105 z-50 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.8)] border-y border-r border-[#d11100]/20 rounded-r-lg my-2 origin-left md:origin-center md:-ml-2 md:w-[105%]' 
+                        : 'bg-transparent border-b border-slate-800/50 border-l-4 border-l-transparent hover:bg-slate-800/40'
+                    }
                   `}
                 >
                   <div className="p-4 flex items-center justify-between relative z-10">
                     <div className="flex items-center space-x-4">
                       <span className={`
-                        text-xl font-black italic w-8 text-right transition-colors duration-300 font-['Rajdhani']
-                        ${isActive ? 'text-[#d11100]' : 'text-slate-700 group-hover:text-slate-500'}
+                        font-black italic w-8 text-right transition-all duration-300 font-['Rajdhani']
+                        ${isActive ? 'text-3xl text-[#d11100]' : 'text-xl text-slate-700 group-hover:text-slate-500'}
                       `}>
                         {index + 1}
                       </span>
                       <div>
-                        <h3 className={`font-bold text-base transition-colors duration-300 ${isActive ? 'text-white' : 'text-slate-300'}`}>
+                        <h3 className={`font-bold transition-all duration-300 ${isActive ? 'text-2xl text-white mb-1 leading-none' : 'text-base text-slate-300'}`}>
                           {loc.city}
                         </h3>
-                        <p className={`text-[10px] uppercase tracking-widest font-semibold transition-colors duration-300 ${isActive ? 'text-[#ff5555]' : 'text-slate-500'}`}>
+                        <p className={`uppercase tracking-widest font-semibold transition-all duration-300 ${isActive ? 'text-xs text-[#ff5555]' : 'text-[10px] text-slate-500'}`}>
                           {loc.country}
                         </p>
                       </div>
@@ -115,7 +148,7 @@ const App: React.FC = () => {
                   
                   {/* Expandable Info Section */}
                   <div className={`
-                    overflow-hidden transition-all duration-500 ease-in-out bg-[#050b14]/80
+                    overflow-hidden transition-all duration-500 ease-in-out bg-[#050b14]/50
                     ${isActive ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0'}
                   `}>
                     <div className="p-4 pt-0 pl-16 text-sm text-slate-400 space-y-2">
