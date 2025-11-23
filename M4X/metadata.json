@@ -1,0 +1,5 @@
+{
+  "name": "F1 Global Circuit Tracker",
+  "description": "Interactive 3D globe visualizing Formula 1 Grand Prix locations with responsive highlighting and rotation controls.",
+  "requestFramePermissions": []
+}
