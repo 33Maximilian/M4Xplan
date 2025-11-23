@@ -1,2 +1,18 @@
-起因是一直想玩前端于是就有了这个
-何尝不是一种平面设计呢！（？
+## Project M4X.md
+
+**Run Locally:**
+
+**Prerequisites:**  Node.js
+
+
+1. Install dependencies:
+   `npm install`
+2.  Run the app:
+   `npm run dev`
+
+**Click here to see what I have done：**
+https://33maximilian.github.io/M4Xplan/
+
+Nothing just for Max，luv u my goat ：）
+
+![Background](background2.jpg)
