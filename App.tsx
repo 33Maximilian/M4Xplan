@@ -197,7 +197,7 @@ const App: React.FC = () => {
                      Domination
                  </span>
              </h1>
-             <div className="mt-8 border-l-4 border-[#d11100] pl-5 text-[#aabce0] leading-relaxed font-['Space_Grotesk'] text-sm md:text-base bg-slate-900/30 backdrop-blur-sm p-4 pointer-events-auto">
+             <div className="mt-8 border-l-4 border-[#d11100] pl-5 text-[#aabce0] leading-relaxed font-['Space_Grotesk'] text-sm md:text-base bg-slate-900/30 backdrop-blur-sm p-4 pointer-events-auto max-w-[45ch]">
                 Drag the globe to rotate. Scroll to zoom.<br />
                 Hover list or globe to view race schedule & results.
              </div>

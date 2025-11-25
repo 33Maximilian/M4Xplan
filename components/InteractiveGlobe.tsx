@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState, useMemo } from 'react';
 import * as d3 from 'd3';
 import * as topojson from 'topojson-client';
 import { COLORS, LOCATIONS } from '../constants';
-import { WorldAtlasData } from '../types';
 
 interface InteractiveGlobeProps {
   activeLocationId: number | null;
@@ -18,21 +17,76 @@ const InteractiveGlobe: React.FC<InteractiveGlobeProps> = ({ activeLocationId, o
   const [isDragging, setIsDragging] = useState(false);
   const [zoom, setZoom] = useState(1);
   const lastDragPos = useRef<{ x: number; y: number } | null>(null);
-
-  // Animation reference for auto-rotation
   const requestRef = useRef<number>(0);
 
-  // Load map data - 50m for better resolution
+  // Load Map Data
   useEffect(() => {
-    fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json')
-      .then((response) => response.json())
-      .then((data: WorldAtlasData) => {
-        const countries = topojson.feature(data as any, data.objects.countries as any);
-        setGeoData((countries as any).features);
+    fetch('./map/world.json')
+      .then(async (res) => {
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        return res.json();
+      })
+      .then(data => {
+        let features: any[] = [];
+        // Handle TopoJSON
+        if (data.type === 'Topology' && data.objects) {
+             const key = Object.keys(data.objects).find(k => ['world', 'countries', 'land', 'states'].includes(k)) || Object.keys(data.objects)[0];
+             const object = data.objects[key];
+             if (object) {
+                 features = (topojson.feature(data as any, object as any) as any).features;
+             }
+        } 
+        // Handle GeoJSON
+        else if (data.type === 'FeatureCollection') {
+             features = data.features;
+        } else if (data.type === 'Feature') {
+             features = [data];
+        }
+
+        // Robust winding order fix using geoArea
+        // If a feature's area is larger than a hemisphere (2*PI), it is defined "inside-out" 
+        // (wrapping the ocean instead of the land). We must reverse it.
+        const fixedFeatures = features
+          .filter(f => f.geometry) 
+          .map(f => {
+            const feature = JSON.parse(JSON.stringify(f)); // Deep clone
+            
+            // Helper to reverse rings in a polygon coordinate array
+            const reversePolygon = (coords: any[][]) => coords.map((ring) => [...ring].reverse());
+
+            // Check spherical area
+            // 2 * Math.PI is the area of a hemisphere. No country is larger than that.
+            // If area > 2PI, the geometry is inverted.
+            const area = d3.geoArea(feature);
+            const isAntarctica = feature.properties?.name === 'Antarctica';
+            
+            // Antarctica is special because it wraps the pole, but usually geoArea handles it if defined correctly.
+            // We mainly care about "hole in the world" artifacts for other countries.
+            let shouldReverse = false;
+            
+            if (area > 2 * Math.PI) {
+                shouldReverse = true;
+            }
+
+            if (shouldReverse) {
+                 const geometry = feature.geometry;
+                 if (geometry.type === 'Polygon') {
+                     geometry.coordinates = reversePolygon(geometry.coordinates);
+                 } else if (geometry.type === 'MultiPolygon') {
+                     geometry.coordinates = geometry.coordinates.map((coords: any[][]) => reversePolygon(coords));
+                 }
+            }
+            
+            return feature;
+        });
+
+        setGeoData(fixedFeatures);
+      }).catch(err => {
+        console.error("Error loading map data:", err);
       });
   }, []);
 
-  // Handle resize
+  // Handle window resize
   useEffect(() => {
     const updateSize = () => {
       if (wrapperRef.current) {
@@ -46,18 +100,18 @@ const InteractiveGlobe: React.FC<InteractiveGlobeProps> = ({ activeLocationId, o
     return () => window.removeEventListener('resize', updateSize);
   }, []);
 
-  // Target Location Logic based on ID
+  // Identify target location
   const targetLocation = useMemo(() => {
     if (!activeLocationId) return null;
     return LOCATIONS.find(l => l.id === activeLocationId);
   }, [activeLocationId]);
 
-  // Derived Active Country Name for Highlighting
+  // Identify active country name for highlighting
   const activeCountryGeoName = useMemo(() => {
     return targetLocation?.geoJsonName || null;
   }, [targetLocation]);
 
-  // Rotation Logic
+  // Rotation Animation Logic
   useEffect(() => {
     if (targetLocation && !isDragging) {
       const targetLon = -targetLocation.coordinates.lng;
@@ -67,10 +121,13 @@ const InteractiveGlobe: React.FC<InteractiveGlobeProps> = ({ activeLocationId, o
         setRotation(prev => {
           const [currLon, currLat] = prev;
           let dLon = targetLon - currLon;
+          // Normalize longitude diff to take shortest path
           if (dLon > 180) dLon -= 360;
           if (dLon < -180) dLon += 360;
+          
           const dLat = targetLat - currLat;
           
+          // Stop if close enough
           if (Math.abs(dLon) < 0.5 && Math.abs(dLat) < 0.5) {
              return [targetLon, targetLat, 0];
           }
@@ -81,6 +138,7 @@ const InteractiveGlobe: React.FC<InteractiveGlobeProps> = ({ activeLocationId, o
       };
       requestRef.current = requestAnimationFrame(animate);
     } else if (!isDragging && !activeLocationId) {
+       // Idle rotation
        const spin = () => {
          setRotation(r => [r[0] + 0.15, r[1], r[2]]);
          requestRef.current = requestAnimationFrame(spin);
@@ -92,28 +150,33 @@ const InteractiveGlobe: React.FC<InteractiveGlobeProps> = ({ activeLocationId, o
     };
   }, [targetLocation, isDragging, activeLocationId]);
 
-  // Projection
+  // Projection Setup
   const projection = useMemo(() => {
-    // 0.9 scale factor applied
     return d3.geoOrthographic()
       .scale((dimensions.width / 2.6) * 0.9 * zoom) 
       .translate([dimensions.width / 2, dimensions.height / 2])
-      .rotate(rotation);
+      .rotate(rotation)
+      // CRITICAL FIX: Use 89.9 instead of 90. 
+      // This prevents boundary singularities where polygons touch the exact clipping horizon,
+      // which often causes the "whole world red" inversion glitch.
+      .clipAngle(89.9) 
+      // Adjusted precision to optimize performance and reduce edge clipping artifacts
+      .precision(0.5);
   }, [dimensions, rotation, zoom]);
 
   const pathGenerator = useMemo(() => {
     return d3.geoPath().projection(projection);
   }, [projection]);
 
-  // Helper to check if a coordinate is on the front side of the globe
+  // Visibility Check (Front vs Back of Globe)
   const isVisible = (lng: number, lat: number) => {
     const center = projection.invert?.([dimensions.width / 2, dimensions.height / 2]);
     if (!center) return false;
     const d = d3.geoDistance([lng, lat], center);
-    return d < 1.57; // < 90 degrees (approx PI/2)
+    return d < 1.57; // slightly less than PI/2 to hide markers exactly on edge
   };
 
-  // Drag Handlers
+  // Input Handlers
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
     lastDragPos.current = { x: e.clientX, y: e.clientY };
@@ -128,14 +191,11 @@ const InteractiveGlobe: React.FC<InteractiveGlobeProps> = ({ activeLocationId, o
   const handleMouseLeave = () => {
     setIsDragging(false);
     lastDragPos.current = null;
-    onLocationHover(null);
   };
   const handleMouseUp = () => {
     setIsDragging(false);
     lastDragPos.current = null;
   };
-
-  // Zoom Handler
   const handleWheel = (e: React.WheelEvent) => {
     const scaleFactor = 1.05;
     const direction = e.deltaY > 0 ? 1 / scaleFactor : scaleFactor;
@@ -144,6 +204,12 @@ const InteractiveGlobe: React.FC<InteractiveGlobeProps> = ({ activeLocationId, o
 
   const globeRadius = (dimensions.width / 2.6) * 0.9 * zoom;
   const atmosphereRadius = globeRadius * 1.2;
+
+  // Pre-filter countries that have races
+  const raceCountries = useMemo(() => {
+      const locationNames = new Set(LOCATIONS.map(l => l.geoJsonName));
+      return geoData.filter(d => locationNames.has(d.properties?.name));
+  }, [geoData]);
 
   return (
     <div 
@@ -157,7 +223,6 @@ const InteractiveGlobe: React.FC<InteractiveGlobeProps> = ({ activeLocationId, o
     >
       <svg width={dimensions.width} height={dimensions.height} ref={svgRef} style={{ overflow: 'visible' }}>
         <defs>
-          {/* Expanded Black Core Gradient */}
           <radialGradient id="oceanGradient" cx="50%" cy="50%" r="50%">
             <stop offset="0%" stopColor="#000000" />
             <stop offset="55%" stopColor="#000000" /> 
@@ -181,15 +246,16 @@ const InteractiveGlobe: React.FC<InteractiveGlobeProps> = ({ activeLocationId, o
           </filter>
         </defs>
 
-        {/* Atmosphere Halo */}
+        {/* Atmosphere */}
         <circle 
           cx={dimensions.width / 2} 
           cy={dimensions.height / 2} 
           r={atmosphereRadius} 
           fill="url(#atmosphereHalo)"
+          style={{ pointerEvents: 'none' }}
         />
 
-        {/* Ocean Base */}
+        {/* Ocean (Background) */}
         <circle 
           cx={dimensions.width / 2} 
           cy={dimensions.height / 2} 
@@ -197,72 +263,69 @@ const InteractiveGlobe: React.FC<InteractiveGlobeProps> = ({ activeLocationId, o
           fill="url(#oceanGradient)"
         />
 
-        {/* Countries */}
+        {/* Layer 1: All Land Base (Passive) */}
+        <g style={{ pointerEvents: 'none' }}>
+          {geoData.map((d, i) => (
+             <path
+                key={`base-${i}`}
+                d={pathGenerator(d) || undefined}
+                fill={COLORS.LAND}
+                stroke={COLORS.STROKE_NORMAL}
+                strokeWidth={0.5}
+                strokeLinejoin="round"
+              />
+          ))}
+        </g>
+
+        {/* Layer 2: Active Highlight (Only draws the active country) */}
+        {activeCountryGeoName && (
+            <g style={{ pointerEvents: 'none', filter: 'url(#active-glow)' }}>
+                {geoData
+                   .filter(d => d.properties?.name === activeCountryGeoName)
+                   .map((d, i) => (
+                     <path
+                        key={`highlight-${i}`}
+                        d={pathGenerator(d) || undefined}
+                        fill={COLORS.HIGHLIGHT}
+                        stroke={COLORS.STROKE_HIGHLIGHT}
+                        strokeWidth={1.5}
+                        strokeLinejoin="round"
+                      />
+                   ))
+                }
+            </g>
+        )}
+
+        {/* Layer 3: Interaction Layer (Transparent Hit Targets for Race Countries) */}
         <g>
-          {geoData.map((d, i) => {
-            const isHighlighted = d.properties.name === activeCountryGeoName;
-            const isRaceCountry = LOCATIONS.some(l => l.geoJsonName === d.properties.name);
-            
-            let fill = COLORS.LAND;
-            if (isHighlighted) fill = COLORS.HIGHLIGHT;
-            
+          {raceCountries.map((d, i) => {
+            const countryName = d.properties?.name;
             return (
               <path
-                key={i}
+                key={`hit-${i}`}
                 d={pathGenerator(d) || undefined}
-                fill={fill}
-                stroke={isHighlighted ? COLORS.STROKE_HIGHLIGHT : (isRaceCountry ? COLORS.STROKE_NORMAL : 'none')}
-                strokeWidth={isHighlighted ? 2 : 0.5}
-                style={{
-                   transition: 'fill 0.3s, stroke 0.3s',
-                   cursor: isRaceCountry ? 'pointer' : 'default',
-                   filter: isHighlighted ? 'url(#active-glow)' : 'none'
-                }}
-                onMouseMove={(e) => {
-                  if (!isRaceCountry) return;
-                  
-                  // Get all races in this country (e.g., USA has Miami, Austin, Vegas)
-                  const countryLocations = LOCATIONS.filter(l => l.geoJsonName === d.properties.name);
-                  
-                  if (countryLocations.length === 1) {
-                    // Simple case: only one race
-                    if (activeLocationId !== countryLocations[0].id) {
-                       onLocationHover(countryLocations[0].id);
-                    }
-                  } else {
-                    // Complex case: Multiple races (Proximity Detection)
-                    // This handles distinguishing Miami vs Austin vs Vegas
-                    const [mx, my] = d3.pointer(e, svgRef.current);
-                    const inverted = projection.invert?.([mx, my]);
-                    
-                    if (inverted) {
-                      const [lon, lat] = inverted;
-                      let closestLoc = countryLocations[0];
-                      let minDist = Infinity;
-
-                      countryLocations.forEach(loc => {
-                        const dist = d3.geoDistance([lon, lat], [loc.coordinates.lng, loc.coordinates.lat]);
-                        if (dist < minDist) {
-                          minDist = dist;
-                          closestLoc = loc;
+                fill="transparent"
+                stroke="none"
+                style={{ cursor: 'pointer', pointerEvents: 'all' }}
+                onMouseEnter={() => {
+                    const countryLocations = LOCATIONS.filter(l => l.geoJsonName === countryName);
+                    if (countryLocations.length === 1) {
+                        onLocationHover(countryLocations[0].id);
+                    } else if (countryLocations.length > 1) {
+                        if (!countryLocations.some(l => l.id === activeLocationId)) {
+                           onLocationHover(countryLocations[0].id);
                         }
-                      });
-
-                      if (activeLocationId !== closestLoc.id) {
-                        onLocationHover(closestLoc.id);
-                      }
                     }
-                  }
                 }}
                 onMouseLeave={() => {
-                   // Handled by wrapper mouseleave mostly, but good to have
+                   // Optional: logic to clear hover
                 }}
               />
             );
           })}
         </g>
 
-        {/* Markers Layer */}
+        {/* Layer 4: Race Locations Markers (Cities) */}
         <g>
           {LOCATIONS.map((loc) => {
              if (!isVisible(loc.coordinates.lng, loc.coordinates.lat)) return null;
@@ -270,20 +333,14 @@ const InteractiveGlobe: React.FC<InteractiveGlobeProps> = ({ activeLocationId, o
              const [cx, cy] = projection([loc.coordinates.lng, loc.coordinates.lat]) || [-999, -999];
              const isActive = activeLocationId === loc.id;
              
-             // Show glowing dot for ANY active location.
-             // This visually confirms the specific selection (Miami vs Austin) even though
-             // the whole US plate is highlighted.
-             const showVisualDot = isActive;
-
              return (
                <g key={loc.id} style={{ pointerEvents: 'all', cursor: 'pointer' }}
                   onMouseEnter={() => onLocationHover(loc.id)}
                >
-                 {/* Invisible Hit Target for easier hovering of small points */}
+                 {/* Hit area */}
                  <circle cx={cx} cy={cy} r={12} fill="transparent" />
-
-                 {/* Visible Dot */}
-                 {showVisualDot && (
+                 {/* Visible marker */}
+                 {isActive && (
                    <circle 
                      cx={cx} 
                      cy={cy} 
@@ -299,7 +356,7 @@ const InteractiveGlobe: React.FC<InteractiveGlobeProps> = ({ activeLocationId, o
           })}
         </g>
         
-        {/* Inner Rim Highlight */}
+        {/* Rim Highlight */}
         <circle 
           cx={dimensions.width / 2} 
           cy={dimensions.height / 2} 
@@ -308,6 +365,7 @@ const InteractiveGlobe: React.FC<InteractiveGlobeProps> = ({ activeLocationId, o
           stroke={COLORS.HIGHLIGHT}
           strokeWidth="1"
           opacity="0.2"
+          style={{ pointerEvents: 'none' }}
         />
       </svg>
     </div>
