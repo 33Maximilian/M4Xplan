@@ -21,7 +21,7 @@ const InteractiveGlobe: React.FC<InteractiveGlobeProps> = ({ activeLocationId, o
 
   // Load Map Data
   useEffect(() => {
-    fetch('./map/world.json')
+    fetch('https://raw.githubusercontent.com/jxj666/earthWordMap/main/wrold.json')
       .then(async (res) => {
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         return res.json();
