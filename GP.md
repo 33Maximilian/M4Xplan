@@ -22,5 +22,5 @@
 |20  | Mexico City Grand Prix            | Mexico (Mexico City)        | 24-26 Oct     | 5      | 3                  |
 |21  | Brazilian Grand Prix              | Brazil (São Paulo)          | 07-09 Nov     | 16      | 3                  |
 |22  | Las Vegas Grand Prix               | USA (Las Vegas)             | 20-22 Nov     | 2      | 1               |
-|23  | Qatar Grand Prix                   | Qatar (Lusail)              | 28-30 Nov     | WAIT FOR IT      | WAIT FOR IT      |
+|23  | Qatar Grand Prix                   | Qatar (Lusail)              | 28-30 Nov     | 3      | 1      |
 |24  | Abu Dhabi Grand Prix               | UAE (Yas Marina)            | 05-07 Dec     | WAIT FOR IT       | WAIT FOR IT                   |
