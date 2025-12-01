@@ -28,9 +28,9 @@ export const LOCATIONS: LocationData[] = [
 ];
 
 export const COLORS = {
-  OCEAN: '#081f44',    // Navy Blue
-  LAND: 'rgb(186, 18, 3)', // Deep Red
-  HIGHLIGHT: '#FF1801', // Neon Red
+  OCEAN: '#1a3197ff',    // Navy Blue #081f44
+  LAND: 'rgba(203, 15, 50, 1)', // Deep Red rgb(186, 18, 3)
+  HIGHLIGHT: 'rgba(238, 31, 69, 1)', // 原红牛红: #FF1801
   STROKE_NORMAL: '#600800', 
   STROKE_HIGHLIGHT: '#ffaba3' // Lighter salmon/pinkish red as requested
 };

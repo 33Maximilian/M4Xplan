@@ -13,12 +13,12 @@ const App: React.FC = () => {
 
   // Background Music Logic
   useEffect(() => {
-    const audio = new Audio('alive.mp3');
+    const audio = new Audio('Von Dutch.mp3');
     audio.loop = true;
-    audio.volume = 0.6; // Set a reasonable volume
+    audio.volume = 0.8; // Set a reasonable volume
 
     // Set start time to 5 seconds
-    audio.currentTime = 5;
+    audio.currentTime = 0;
 
     // Attempt to play immediately
     const playPromise = audio.play();
@@ -29,7 +29,7 @@ const App: React.FC = () => {
         
         // If blocked, add listeners to play on first interaction
         const enableAudio = () => {
-          audio.currentTime = 5;
+          audio.currentTime = 0;
           audio.play().then(() => setAudioTipVisible(false));
           setAudioTipVisible(false);
           // Remove listeners once played
@@ -89,7 +89,7 @@ const App: React.FC = () => {
 
       {/* Background Image Overlay (Multiply Mode) */}
       <img 
-        src="background1.jpg"
+        src="QTR.jpg"
         alt="Background Overlay"
         className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none"
       />
@@ -98,9 +98,9 @@ const App: React.FC = () => {
       <aside className="absolute bottom-0 md:top-0 md:right-0 w-full h-1/3 md:h-full md:w-80 bg-slate-900/80 border-t md:border-t-0 md:border-l border-red-900/50 flex flex-col z-30 shadow-2xl backdrop-blur-sm">
         <div className="hidden md:block p-6 border-b border-red-900/20 bg-gradient-to-b from-slate-900/90 to-slate-900/80 relative z-20">
           <h1 className="text-3xl font-black tracking-tighter italic text-white uppercase font-['Rajdhani']">
-            F1  <span className="text-[#d11100]">RACE CALENDAR</span>
+            F1  <span className="text-[rgba(205,4,41,1)]" /* 原红牛红: text-[#d11100] */>RACE CALENDAR</span>
           </h1>
-          <div className="h-1 w-20 bg-[#d11100] mt-2 rounded-full"></div>
+          <div className="h-1 w-20 bg-[rgba(205,4,41,1)] mt-2 rounded-full" /* 原红牛红: bg-[#d11100] */></div>
         </div>
         
         <div className="flex-1 overflow-y-auto custom-scrollbar bg-transparent px-2 md:px-0 pb-10">
@@ -122,7 +122,8 @@ const App: React.FC = () => {
                   className={`
                     group relative cursor-pointer transition-all duration-300 ease-out font-['Space_Grotesk']
                     ${isActive 
-                        ? 'bg-[#0a1624] border-l-4 border-l-[#d11100] scale-105 z-50 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.8)] border-y border-r border-[#d11100]/20 rounded-r-lg my-2 origin-left md:origin-center md:-ml-2 md:w-[105%]' 
+                        /* 原红牛红边框: border-l-[#d11100], border-[#d11100]/20 */
+                        ? 'bg-[#0a1624] border-l-4 border-l-[rgba(205,4,41,1)] scale-105 z-50 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.8)] border-y border-r border-[rgba(205,4,41,0.2)] rounded-r-lg my-2 origin-left md:origin-center md:-ml-2 md:w-[105%]' 
                         : 'bg-transparent border-b border-slate-800/50 border-l-4 border-l-transparent hover:bg-slate-800/40'
                     }
                   `}
@@ -131,7 +132,7 @@ const App: React.FC = () => {
                     <div className="flex items-center space-x-4">
                       <span className={`
                         font-black italic w-8 text-right transition-all duration-300 font-['Rajdhani']
-                        ${isActive ? 'text-3xl text-[#d11100]' : 'text-xl text-slate-700 group-hover:text-slate-500'}
+                        ${isActive ? 'text-3xl text-[rgba(205,4,41,1)]' /* 原红牛红: text-[#d11100] */ : 'text-xl text-slate-700 group-hover:text-slate-500'}
                       `}>
                         {index + 1}
                       </span>
@@ -152,16 +153,17 @@ const App: React.FC = () => {
                     ${isActive ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0'}
                   `}>
                     <div className="p-4 pt-0 pl-16 text-sm text-slate-400 space-y-2">
+                       {/* 原红牛红标签: text-[#d11100] */}
                        <div className="flex items-start space-x-2">
-                          <span className="text-[#d11100] text-xs font-bold w-16 shrink-0 pt-0.5">CIRCUIT:</span>
+                          <span className="text-[rgba(205,4,41,1)] text-xs font-bold w-16 shrink-0 pt-0.5">CIRCUIT:</span>
                           <span className="text-slate-200 leading-snug">{loc.circuit}</span>
                        </div>
                        <div className="flex items-center space-x-2">
-                          <span className="text-[#d11100] text-xs font-bold w-16 shrink-0">DATE:</span>
+                          <span className="text-[rgba(205,4,41,1)] text-xs font-bold w-16 shrink-0">DATE:</span>
                           <span className="text-slate-200">{loc.date}</span>
                        </div>
                        <div className="flex items-center space-x-2">
-                          <span className="text-[#d11100] text-xs font-bold w-16 shrink-0">RESULT:</span>
+                          <span className="text-[rgba(205,4,41,1)] text-xs font-bold w-16 shrink-0">RESULT:</span>
                           <span className="text-white font-mono font-bold">{loc.qualifyingResult} &rarr; {loc.raceResult}</span>
                        </div>
                        <div className="mt-2 text-[10px] text-slate-600 italic text-right pr-2">
@@ -180,24 +182,28 @@ const App: React.FC = () => {
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-20 p-8 md:p-16 flex flex-col justify-center">
          {/* Logo */}
          <div className="absolute top-8 left-8 md:top-12 md:left-16 font-['Rajdhani'] font-extrabold text-[5rem] italic text-white">
-             MV<span className="text-[#d11100]">33</span>
+             MV<span className="text-[rgba(205,4,41,1)]" /* 原红牛红: #d11100 */>33</span>
          </div>
 
          {/* Hero Text */}
          <div className="relative transform -translate-y-1/2 top-1/2 max-w-xl">
-             <div className="bg-[#d11100] text-white px-4 py-1 font-bold text-[0.9rem] inline-block transform -skew-x-[15deg] mb-5 shadow-[0_0_20px_rgba(255,24,1,0.5)] font-['Space_Grotesk']">
+             {/* 原红牛红背景: bg-[#d11100], 原阴影: shadow-[0_0_20px_rgba(255,24,1,0.5)] */}
+             <div className="bg-[rgba(205,4,41,1)] text-white px-4 py-1 font-bold text-[0.9rem] inline-block transform -skew-x-[15deg] mb-5 shadow-[0_0_20px_rgba(205,4,41,0.5)] font-['Space_Grotesk']">
                  2025 SEASON
              </div>
              <h1 className="font-['Rajdhani'] text-[3rem] md:text-[5rem] leading-[0.9] uppercase m-0 text-white font-bold">
                  Global<br />
+                 {/* 原描边效果: className="text-transparent text-stroke-red" (-webkit-text-stroke: 1px #d11100) */}
+                 {/* 原红晕: textShadow: "0 0 30px rgba(255, 24, 1, 0.3)" */}
                  <span 
-                   className="text-transparent text-stroke-red"
-                   style={{ textShadow: "0 0 30px rgba(255, 24, 1, 0.3)" }}
+                   className="text-[rgba(205,4,41,1)]"
+                   style={{ textShadow: "0 0 8px rgba(205,4,41,0.95), 0 0 40px rgba(205,4,41,0.45)" }}
                  >
                      Domination
                  </span>
              </h1>
-             <div className="mt-8 border-l-4 border-[#d11100] pl-5 text-[#aabce0] leading-relaxed font-['Space_Grotesk'] text-sm md:text-base bg-slate-900/30 backdrop-blur-sm p-4 pointer-events-auto max-w-[45ch]">
+             {/* 原红牛红左边框: border-[#d11100] */}
+             <div className="mt-8 border-l-4 border-[rgba(205,4,41,1)] pl-5 text-[#aabce0] leading-relaxed font-['Space_Grotesk'] text-sm md:text-base bg-slate-900/30 backdrop-blur-sm p-4 pointer-events-auto max-w-[45ch]">
                 Drag the globe to rotate. Scroll to zoom.<br />
                 Hover list or globe to view race schedule & results.
              </div>

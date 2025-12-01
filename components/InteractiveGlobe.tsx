@@ -15,7 +15,7 @@ const InteractiveGlobe: React.FC<InteractiveGlobeProps> = ({ activeLocationId, o
   const [dimensions, setDimensions] = useState({ width: 800, height: 800 });
   const [rotation, setRotation] = useState<[number, number, number]>([0, 0, 0]);
   const [isDragging, setIsDragging] = useState(false);
-  const [zoom, setZoom] = useState(1);
+  const [zoom, setZoom] = useState(0.9);
   const lastDragPos = useRef<{ x: number; y: number } | null>(null);
   const requestRef = useRef<number>(0);
 
@@ -224,17 +224,18 @@ const InteractiveGlobe: React.FC<InteractiveGlobeProps> = ({ activeLocationId, o
       <svg width={dimensions.width} height={dimensions.height} ref={svgRef} style={{ overflow: 'visible' }}>
         <defs>
           <radialGradient id="oceanGradient" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#000000" />
-            <stop offset="55%" stopColor="#000000" /> 
-            <stop offset="75%" stopColor="#030e20" /> 
+            <stop offset="0%" stopColor="#030d1fff" /> {/* #000000ff */}
+            <stop offset="50%" stopColor="#061b3eff" /> {/* #000000ff */}
+            <stop offset="90%" stopColor="#0b2e6aff" /> {/* #030e20 */}
             <stop offset="100%" stopColor={COLORS.OCEAN} />
           </radialGradient>
           
+          {/* 原红牛红大气层: stopColor="#FF1801" */}
           <radialGradient id="atmosphereHalo" cx="50%" cy="50%" r="50%">
-             <stop offset="0%" stopColor="#FF1801" stopOpacity="0" />
-             <stop offset="82%" stopColor="#FF1801" stopOpacity="0" />
-             <stop offset="83.3%" stopColor="#FF1801" stopOpacity="0.5" />
-             <stop offset="100%" stopColor="#FF1801" stopOpacity="0" />
+             <stop offset="0%" stopColor="rgba(205, 4, 41, 1)" stopOpacity="0" />
+             <stop offset="82%" stopColor="rgba(205, 4, 41, 1)" stopOpacity="0" />
+             <stop offset="83.3%" stopColor="rgba(205, 4, 41, 1)" stopOpacity="0.5" />
+             <stop offset="100%" stopColor="rgba(205, 4, 41, 1)" stopOpacity="0" />
           </radialGradient>
 
            <filter id="active-glow" x="-50%" y="-50%" width="200%" height="200%">
