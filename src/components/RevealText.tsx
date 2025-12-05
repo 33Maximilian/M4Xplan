@@ -1,4 +1,9 @@
 import React, { useLayoutEffect, useRef } from 'react';
+import { gsap } from 'gsap';
+import { SplitText } from 'gsap/SplitText';
+
+// Register SplitText plugin
+gsap.registerPlugin(SplitText);
 
 interface RevealTextProps {
   text: string;
@@ -10,11 +15,9 @@ const RevealText: React.FC<RevealTextProps> = ({ text, className = "", start = f
   const elRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
-    if (!start || !elRef.current || !window.gsap || !window.SplitText) return;
+    if (!start || !elRef.current) return;
 
     const el = elRef.current;
-    const gsap = window.gsap;
-    const SplitText = window.SplitText;
 
     // Create a GSAP context for easy cleanup
     const ctx = gsap.context(() => {
