@@ -1,0 +1,682 @@
+/* Shhhh I'm using three different fonts, but i don't care */
+@import url("https://fonts.cdnfonts.com/css/longsile");
+@import url("https://fonts.cdnfonts.com/css/thegoodmonolith");
+@import url("https://fonts.cdnfonts.com/css/pp-neue-montreal");
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --text: #cd0429; /* Unified Red Bull Red */
+  --bg: #061D42;   /* Unified Deep Navy */
+  --highlight-bg: #d01d1d;
+  --type-line-opacity: 0.05;
+}
+
+body {
+  background-color: var(--bg);
+  min-height: 100vh;
+  overflow: hidden;
+  font-family: "Longsile", sans-serif;
+  position: relative;
+}
+
+/* Global frame (unused in Intro, but kept for safety if used elsewhere) */
+.background-frame {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background-image: none;
+  background-color: transparent;
+  background-size: 100% 100%;
+  background-position: center;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.bottom-gradient {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 40vh;
+  background: linear-gradient(
+    to top,
+    rgb(3, 21, 51) 0%,
+    rgba(19, 62, 135, 0) 100%
+  );
+  z-index: 1;
+  pointer-events: none;
+}
+
+.background-image {
+  position: fixed;
+  width: calc(100%);
+  height: calc(100vh);
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  z-index: 1;
+  transition: opacity 0.8s ease-in-out;
+}
+
+.background-image.default {
+  background-image: url("https://assets.codepen.io/7558/wave-bg-001.webp");
+  opacity: 1;
+}
+
+.background-image.focus {
+  background-image: url("https://assets.codepen.io/7558/wave-bg-002.webp");
+}
+
+.background-image.presence {
+  background-image: url("https://assets.codepen.io/7558/wave-bg-003.webp");
+}
+
+.background-image.feel {
+  background-image: url("https://assets.codepen.io/7558/wave-bg-004.webp");
+}
+
+.text-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.text-item {
+  position: absolute;
+  color: var(--text);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  opacity: 0.8;
+  white-space: nowrap;
+  font-family: "TheGoodMonolith", monospace;
+  z-index: 0;
+}
+
+.text-item::after {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: -4px;
+  width: 0;
+  height: calc(100% + 4px);
+  background-color: var(--highlight-bg);
+  z-index: 1;
+  transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.text-item.highlight::after {
+  width: calc(100% + 8px);
+}
+
+.text-item.highlight-reverse::after {
+  width: 0;
+  right: -4px;
+  left: auto;
+}
+
+.main-content {
+  position: relative;
+  z-index: 10;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.sliced-container {
+  position: relative;
+  width: auto;
+  max-width: 100%;
+  margin: 0 auto;
+  transform: translateZ(0);
+}
+
+.text-row {
+  position: relative;
+  width: 100%;
+  height: 140px;
+  margin: 10px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+  z-index: 100;
+}
+
+.text-content,
+.char,
+.char-inner {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+.text-content {
+  position: relative;
+  font-size: 10rem;
+  font-weight: normal;
+  text-transform: uppercase;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  color: var(--text);
+  letter-spacing: 0px;
+  transition: letter-spacing 0.5s ease;
+  visibility: hidden;
+  transform: translate3d(0, 0, 0);
+}
+
+.text-row:hover .text-content {
+  letter-spacing: 5px;
+}
+
+.interactive-area {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  cursor: pointer;
+}
+
+.char {
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+  max-width: 80px;
+  transition: max-width 0.64s cubic-bezier(0.86, 0, 0.07, 1);
+  margin-right: 0px;
+}
+
+.text-row.active .char::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 1px;
+  height: 80%;
+  background-color: rgba(255, 204, 0, 0.2);
+  transform: none;
+  opacity: 0;
+  animation: fadeIn 0.3s forwards;
+  animation-delay: calc(var(--char-index, 0) * 0.05s);
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+.char.narrow-char {
+  max-width: 40px;
+}
+
+.char:last-child::after {
+  display: none;
+}
+
+.char-inner {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+  will-change: transform;
+  transform: translate3d(-20px, 0, 0);
+}
+
+.type {
+  position: fixed;
+  height: 100vmax;
+  width: 100vmax;
+  text-transform: uppercase;
+  display: none;
+  justify-content: center;
+  align-content: center;
+  text-align: center;
+  top: 50%;
+  left: 50%;
+  margin-top: -50vmax;
+  margin-left: -50vmax;
+  will-change: transform;
+  z-index: 5;
+  transform-style: preserve-3d;
+  pointer-events: none;
+}
+
+.type-line {
+  white-space: nowrap;
+  font-size: clamp(7rem, 18.75vh, 15rem);
+  line-height: 0.75;
+  font-weight: bold;
+  font-family: "PP Neue Montreal", sans-serif;
+  color: #ffffff;
+  opacity: var(--type-line-opacity);
+  user-select: none;
+  will-change: transform, opacity;
+  position: relative;
+}
+
+.type-line.odd {
+  z-index: 50;
+}
+
+.type-line.even {
+  z-index: 150;
+}
+
+/* Mobile Optimization */
+@media screen and (max-width: 992px) {
+  .text-content {
+    font-size: 7rem;
+  }
+
+  .text-row {
+    height: 110px;
+  }
+
+  .type-line {
+    font-size: clamp(5rem, 12vh, 10rem);
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .text-content {
+    font-size: 5rem;
+  }
+
+  .text-row {
+    height: 80px;
+    margin: 8px 0;
+  }
+
+  .type-line {
+    font-size: clamp(3.5rem, 8vh, 7rem);
+  }
+
+  .text-item {
+    font-size: 0.7rem;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .text-content {
+    font-size: 3.5rem;
+  }
+
+  .text-row {
+    height: 60px;
+    margin: 6px 0;
+  }
+
+  .type-line {
+    font-size: clamp(2.5rem, 6vh, 5rem);
+  }
+
+  .text-item {
+    font-size: 0.6rem;
+  }
+}
+
+/* --- KINETIC INTRO STYLES --- */
+.kinetic-intro-wrapper { 
+  --text: #cd0429;
+  --bg: #061D42;
+  --highlight-bg: #d01d1d;
+  --type-line-opacity: 0.05;
+  
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--bg);
+  overflow: hidden;
+  font-family: "Longsile", sans-serif;
+  z-index: 9000;
+  
+  /* Creates a stacking context for mix-blend-mode to work correctly */
+  isolation: isolate; 
+  
+  /* Transition for the exit animation (Dissolve/Scale) */
+  transition: opacity 0.8s ease-in-out, transform 0.8s ease-in-out;
+}
+
+.kinetic-intro-wrapper * {
+  box-sizing: border-box;
+}
+
+.kinetic-intro-wrapper .background-frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("https://assets.codepen.io/7558/web03.webp");
+  background-size: 100% 100%;
+  background-position: center;
+  z-index: 60; /* Topmost background layer */
+  pointer-events: none;
+  
+  /* CRITICAL: Force multiply to blend the white paper texture with the images below */
+  mix-blend-mode: multiply !important;
+  opacity: 1;
+}
+
+.kinetic-intro-wrapper .bottom-gradient {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 40vh;
+  background: linear-gradient(
+    to top,
+    rgba(6, 29, 66, 1) 0%,
+    rgba(6, 29, 66, 0) 100%
+  );
+  z-index: 40; /* Below grain */
+  pointer-events: none;
+}
+
+.kinetic-intro-wrapper .background-image {
+  position: absolute;
+  top: 0; 
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  z-index: 10; /* Bottom-most layer (above solid bg) */
+  /* Normal blend mode so user image colors are preserved, 
+     but the 'multiply' frame above creates the filter/border effect */
+  transition: opacity 0.8s ease-in-out;
+}
+
+/* Force default image to be visible immediately to prevent white flash */
+.kinetic-intro-wrapper .background-image.default {
+  opacity: 1;
+}
+
+/* IDs matching styles */
+.kinetic-intro-wrapper .background-image.donot {
+  /* background-image handled inline in component */
+}
+.kinetic-intro-wrapper .background-image.unleash {
+  /* background-image handled inline in component */
+}
+.kinetic-intro-wrapper .background-image.thelion {
+  /* background-image handled inline in component */
+}
+
+.kinetic-intro-wrapper .text-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 100;
+  pointer-events: none;
+}
+
+.kinetic-intro-wrapper .text-item {
+  position: absolute;
+  color: var(--text);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  opacity: 0.8;
+  white-space: nowrap;
+  font-family: "TheGoodMonolith", monospace;
+  z-index: 0;
+}
+
+.kinetic-intro-wrapper .text-item::after {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: -4px;
+  width: 0;
+  height: calc(100% + 4px);
+  background-color: var(--highlight-bg);
+  z-index: 1;
+  transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.kinetic-intro-wrapper .text-item.highlight::after {
+  width: calc(100% + 8px);
+}
+
+.kinetic-intro-wrapper .text-item.highlight-reverse::after {
+  width: 0;
+  right: -4px;
+  left: auto;
+}
+
+.kinetic-intro-wrapper .main-content {
+  position: relative;
+  z-index: 150;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.kinetic-intro-wrapper .sliced-container {
+  position: relative;
+  width: auto;
+  max-width: 100%;
+  margin: 0 auto;
+  transform: translateZ(0);
+}
+
+.kinetic-intro-wrapper .text-row {
+  position: relative;
+  width: 100%;
+  height: 140px;
+  margin: 10px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+  z-index: 200;
+}
+
+.kinetic-intro-wrapper .text-content,
+.kinetic-intro-wrapper .char,
+.kinetic-intro-wrapper .char-inner {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+.kinetic-intro-wrapper .text-content {
+  position: relative;
+  font-size: 10rem;
+  font-weight: normal;
+  text-transform: uppercase;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  color: var(--text);
+  letter-spacing: 0px;
+  transition: letter-spacing 0.5s ease;
+  visibility: hidden;
+  transform: translate3d(0, 0, 0);
+}
+
+.kinetic-intro-wrapper .text-row:hover .text-content {
+  letter-spacing: 5px;
+}
+
+.kinetic-intro-wrapper .interactive-area {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  cursor: pointer;
+}
+
+.kinetic-intro-wrapper .char {
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+  max-width: 80px;
+  transition: max-width 0.64s cubic-bezier(0.86, 0, 0.07, 1);
+  margin-right: 0px;
+}
+
+.kinetic-intro-wrapper .text-row.active .char::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 1px;
+  height: 80%;
+  background-color: rgba(255, 204, 0, 0.2);
+  transform: none;
+  opacity: 0;
+  animation: fadeIn 0.3s forwards;
+  animation-delay: calc(var(--char-index, 0) * 0.05s);
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+.kinetic-intro-wrapper .char.narrow-char {
+  max-width: 40px;
+}
+
+.kinetic-intro-wrapper .char:last-child::after {
+  display: none;
+}
+
+.kinetic-intro-wrapper .char-inner {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+  will-change: transform;
+  transform: translate3d(-20px, 0, 0);
+}
+
+.kinetic-intro-wrapper .type {
+  position: absolute;
+  height: 100vmax;
+  width: 100vmax;
+  text-transform: uppercase;
+  display: none;
+  justify-content: center;
+  align-content: center;
+  text-align: center;
+  top: 50%;
+  left: 50%;
+  margin-top: -50vmax;
+  margin-left: -50vmax;
+  will-change: transform;
+  z-index: 5;
+  transform-style: preserve-3d;
+  pointer-events: none;
+}
+
+#kinetic-type {
+  z-index: 200 !important;
+  display: grid !important;
+  visibility: visible !important;
+  opacity: 1;
+  pointer-events: none;
+}
+
+.kinetic-intro-wrapper .type-line {
+  white-space: nowrap;
+  font-size: clamp(7rem, 18.75vh, 15rem);
+  line-height: 0.75;
+  font-weight: bold;
+  font-family: "PP Neue Montreal", sans-serif;
+  color: #ffffff;
+  opacity: var(--type-line-opacity);
+  user-select: none;
+  will-change: transform, opacity;
+  position: relative;
+}
+
+.kinetic-intro-wrapper .type-line.odd {
+  z-index: 50;
+}
+
+.kinetic-intro-wrapper .type-line.even {
+  z-index: 150;
+}
+
+/* Mobile Optimization for Kinetic Intro */
+@media screen and (max-width: 992px) {
+  .kinetic-intro-wrapper .text-content {
+    font-size: 7rem;
+  }
+  .kinetic-intro-wrapper .text-row {
+    height: 110px;
+  }
+  .kinetic-intro-wrapper .type-line {
+    font-size: clamp(5rem, 12vh, 10rem);
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .kinetic-intro-wrapper .text-content {
+    font-size: 5rem;
+  }
+  .kinetic-intro-wrapper .text-row {
+    height: 80px;
+    margin: 8px 0;
+  }
+  .kinetic-intro-wrapper .type-line {
+    font-size: clamp(3.5rem, 8vh, 7rem);
+  }
+  .kinetic-intro-wrapper .text-item {
+    font-size: 0.7rem;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .kinetic-intro-wrapper .text-content {
+    font-size: 3.5rem;
+  }
+  .kinetic-intro-wrapper .text-row {
+    height: 60px;
+    margin: 6px 0;
+  }
+  .kinetic-intro-wrapper .type-line {
+    font-size: clamp(2.5rem, 6vh, 5rem);
+  }
+  .kinetic-intro-wrapper .text-item {
+    font-size: 0.6rem;
+  }
+}
