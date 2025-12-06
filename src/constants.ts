@@ -24,7 +24,7 @@ export const LOCATIONS: LocationData[] = [
   { id: 21, city: 'São Paulo', country: 'Brazil', geoJsonName: 'Brazil', coordinates: { lat: -23.5505, lng: -46.6333 }, circuit: 'Autódromo de Interlagos', date: '07-09 Nov', qualifyingResult: '16', raceResult: '3' },
   { id: 22, city: 'Las Vegas', country: 'USA', geoJsonName: 'United States of America', coordinates: { lat: 36.1699, lng: -115.1398 }, circuit: 'Las Vegas Strip Circuit', date: '20-22 Nov', qualifyingResult: '2', raceResult: '1' },
   { id: 23, city: 'Lusail', country: 'Qatar', geoJsonName: 'Qatar', coordinates: { lat: 25.3548, lng: 51.5326 }, circuit: 'Lusail International Circuit', date: '28-30 Nov', qualifyingResult: '3', raceResult: '1' },
-  { id: 24, city: 'Yas Marina', country: 'Abu Dhabi, UAE', geoJsonName: 'United Arab Emirates', coordinates: { lat: 24.4667, lng: 54.3667 }, circuit: 'Yas Marina Circuit', date: '05-07 Dec', qualifyingResult: 'WAIT FOR IT', raceResult: 'WAIT FOR IT' },
+  { id: 24, city: 'Yas Marina', country: 'Abu Dhabi, UAE', geoJsonName: 'United Arab Emirates', coordinates: { lat: 24.4667, lng: 54.3667 }, circuit: 'Yas Marina Circuit', date: '05-07 Dec', qualifyingResult: '1', raceResult: 'WAIT FOR IT' },
 ];
 
 export const COLORS = {
