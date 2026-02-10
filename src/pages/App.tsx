@@ -229,7 +229,7 @@ const App: React.FC = () => {
          {/* Hero Text */}
          <div className="relative transform -translate-y-1/2 top-1/2 max-w-xl">
              <div className="bg-[rgba(205,4,41,1)] text-white px-4 py-1 font-bold text-[0.9rem] inline-block transform -skew-x-[15deg] mb-5 shadow-[0_0_20px_rgba(205,4,41,0.5)] font-['TheGoodMonolith'] tracking-widest">
-                 2025 SEASON
+                 2026 SEASON
              </div>
              <div ref={dominationContainerRef} style={{position: 'relative'}}>
                <h1 className="font-['Rajdhani'] text-[3rem] md:text-[5rem] leading-[0.9] uppercase m-0 text-white font-bold">

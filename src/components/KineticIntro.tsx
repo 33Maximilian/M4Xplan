@@ -70,12 +70,12 @@ const KineticIntro: React.FC<KineticIntroProps> = ({ onComplete, isExiting }) =>
           MAX: "NO MERCY",
           VERSTAPPEN: "STOP HIM",
           "RED BULL": "WARNING",
-          "RB21": "MECHANICAL",
+          "RB22": "MECHANICAL",
           "RBPT": "ENGINE FAIL",
-          "3X WDC": "HISTORY",
+          "4X WDC": "HISTORY",
           "UNSTOPPABLE": "RESIST",
           "33": "TARGET",
-          "1": "CHASE",
+          "3": "CHASE",
           DOMINANCE: "THEIRS",
           CHAMPION: "RIVAL",
           TELEMETRY: "NOISE",
@@ -104,12 +104,12 @@ const KineticIntro: React.FC<KineticIntroProps> = ({ onComplete, isExiting }) =>
           MAX: "ATTACK",
           VERSTAPPEN: "DESTROY",
           "RED BULL": "CHARGE",
-          "RB21": "ROCKET",
+          "RB22": "ROCKET",
           "RBPT": "MAX POWER",
-          "3X WDC": "MORE",
+          "4X WDC": "MORE",
           "UNSTOPPABLE": "FORCE",
           "33": "SPEED",
-          "1": "LEAD",
+          "3": "LEAD",
           DOMINANCE: "EXPAND",
           CHAMPION: "FIGHT",
           TELEMETRY: "DIALED IN",
@@ -138,12 +138,12 @@ const KineticIntro: React.FC<KineticIntroProps> = ({ onComplete, isExiting }) =>
           MAX: "SUPREME",
           VERSTAPPEN: "LEGEND",
           "RED BULL": "FAMILY",
-          "RB21": "WEAPON",
+          "RB22": "WEAPON",
           "RBPT": "HEART",
-          "3X WDC": "4X WDC",
+          "4X WDC": "5X WDC",
           "UNSTOPPABLE": "ETERNAL",
           "33": "ORIGIN",
-          "1": "NUMBER 1",
+          "3": "NUMBER 3",
           DOMINANCE: "ERA",
           CHAMPION: "KING",
           TELEMETRY: "PERFECT",
@@ -896,13 +896,13 @@ const KineticIntro: React.FC<KineticIntroProps> = ({ onComplete, isExiting }) =>
         <div className="text-item" style={{top: '5%', left: '8%'}} data-text="MAXIMUM">MAXIMUM</div>
         <div className="text-item" style={{top: '5%', left: '15%'}} data-text="VON DUTCH">VON DUTCH</div>
         <div className="text-item" style={{top: '5%', left: '28%'}} data-text="RED BULL">RED BULL</div>
-        <div className="text-item" style={{top: '5%', left: '42%'}} data-text="RB21">RB21</div>
+        <div className="text-item" style={{top: '5%', left: '42%'}} data-text="RB22">RB22</div>
         <div className="text-item" style={{top: '5%', left: '55%'}} data-text="RBPT">RBPT</div>
         <div className="text-item" style={{top: '5%', left: '75%'}} data-text="4X WDC">4X WDC</div>
         <div className="text-item" style={{top: '5%', left: '85%'}} data-text="UNSTOPPABLE">UNSTOPPABLE</div>
 
         <div className="text-item" style={{top: '10%', left: '12%'}} data-text="33">33</div>
-        <div className="text-item" style={{top: '10%', left: '45%'}} data-text="1">1</div>
+        <div className="text-item" style={{top: '10%', left: '45%'}} data-text="3">3</div>
         <div className="text-item" style={{top: '10%', right: '20%'}} data-text="DOMINANCE">DOMINANCE</div>
 
         <div className="text-item" style={{top: '15%', left: '8%'}} data-text="CHAMPION">CHAMPION</div>
@@ -978,7 +978,7 @@ const KineticIntro: React.FC<KineticIntroProps> = ({ onComplete, isExiting }) =>
                 className="group relative px-6 py-2 bg-transparent border-none outline-none cursor-pointer"
             >
                 <span className="text-[#cd0429] font-['Rajdhani'] text-xl md:text-2xl tracking-[0.2em] font-bold uppercase transition-transform duration-300 group-hover:scale-150 inline-block">
-                    ENTER 2025 SEASON
+                    ENTER 2026 SEASON
                 </span>
                 <span className="absolute bottom-0 left-0 w-full h-[1px] bg-[#cd0429] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-center"></span>
             </button>
