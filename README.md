@@ -11,7 +11,7 @@
    `npm run dev`
 
 **Click here to see what I have done：**
-https://33maximilian.github.io/M4Xplan/
+https://33M4Ximilian.github.io/M4Xplan/
 
 Nothing just for Max，luv u my goat ：）
 
